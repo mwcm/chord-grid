@@ -48,11 +48,32 @@ most likely culprits are:
      damaging specificity in regions where the backing chords actually do change
      momentarily?
 
-I think Chordify might stumble when it comes to more complicated progressions,
-that's generally not what I use it for, Chordino's likely got the upper hand there.
-Or some combination of both?
+The above means that Chordino/chord-extractor isn't going to be super helpful in my aims - unless I can find a way to use it more like a scalpel for specific difficult chords/changes. I think Chordify would likely stumble when it comes to correctly labeling complicated changes, that's generally not what I use it for though, Chordino's likely got the upper hand there.
 
-So, next find a way to:
-  1. detect a song's beat grid
-  2. detect chords in audio segments cut up by GRID BEATS/BARS rather than letting
-     Chordino detect the chord changes across whole song?
+So, Chordino might still be helpful later for songs or sections of songs which DO NOT BREAK DOWN EASILY INTO SIMPLE, REPEATING, RHYTHM & CHORD BASED SECTIONS. e.g. complex linear or free jazz, edm, prog, weird bridges in any style, etc... 
+
+ 
+So if we're stuck only using Chordino for specific jobs, wat do for the rest?
+  - https://github.com/CPJKU/madmom helpful?
+
+Broken down to a recipe, I think we want to:
+  1. find the bpm and where beats land in time during a song
+      - This is a task that can get complicated quickly with songs that don't break down easily.
+      - That being said, we only care about this working for very simple songs, since we'd use Chordino
+        on more complicated songs/sections anyways.
+      - it would be very nice if we can then break it down by measure/bar/notes and optionally 
+        export detected beat sub-sections as well as chords matched to beats.
+  2. asses what the repeating chord patterns of the song are - section by section, or in entirety
+      - detect chords with an emphasis on UNIFORM ACCURACY ACROSS THE SONG rather than analyzing EXACTLY
+        which tones are playing at a given moment in time. Eg. more important to know that a song is     
+        based around a [Bm, D, A, G, A] pattern than knowing that between 0:30 and 0:47 it sounds exactly 
+        like e.g [Bm7, D6, A7, G/A, A].
+  3. if we can asses what the repeating chord patterns are in a song, or song sections, then we can:
+      - best-fit the chords into a beatgrid, again with emphasis on uniformity across the song or song
+        section, rather than getting exacty nuances of each bar
+      - also important to remember WE ONLY CARE ABOUT WHEN EACH NEW CHORD STARTS, the reader can figure 
+        out what happens inbetween, just like a chord sheet. Chordino gives the EXACT CHANGE, but we 
+        don't care about that here.
+
+So, next find a way to detect a song or partial song's beatgrid.
+Partial song since rhythm could differ between verse/chorus or even change gradually throughout tracks in electronic music.
