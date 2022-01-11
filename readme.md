@@ -1,7 +1,7 @@
 chord-grid
 ----------
 
-requires ffmpeg and ffprobe
+requires ffmpeg and ffprobe built on py3.7.9
 
 
 The goal is to generate a playable grid of samples broken down by beat grid
