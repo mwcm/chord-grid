@@ -72,7 +72,7 @@ Broken down to a recipe, I think we want to:
         analyzing EXACTLY which tones are playing at a given moment in time. (Eg. more important to know 
         that a song is based around a [Bm, D, A, G, A] pattern than knowing that between 0:30 and 0:47 it
         sounds exactly like [Bm7, D6, A7, G/A, A].)
-  3. if we can asses what the repeating chord patterns are in a song, or song sections, then we can:
+  3. if we can detect what the repeating chord patterns are in a song, or song sections, then we can:
       - best-fit the chords into a beatgrid, again with emphasis on uniformity across the song or song
         section, rather than getting exact nuances of each bar in each section
 
