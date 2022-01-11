@@ -13,6 +13,7 @@ through chord_extractor, then export to wav/mp3/flac/midi using pydub (for now).
 Inspired by the chordify grid - which is already doing this very well for most
 songs.
 
+<img width="806" alt="Screen Shot 2022-01-11 at 11 13 19 AM" src="https://user-images.githubusercontent.com/2433319/148979518-16b0d8eb-d979-4256-b1c4-fa3abe1af7fc.png">
 
 Notes:
 ------
