@@ -67,7 +67,7 @@ Broken down to a recipe, I think we want to:
         on more complicated songs/sections anyways.
       - it would be very nice if we can then break it down by measure/bar/notes and optionally 
         export detected beat sub-sections as well as chords matched to beats.
-  2. asses what the repeating chord patterns of the song are - section by section if necessary
+  2. assess what the repeating chord patterns of the song are - section by section if necessary
       - detect chords with an emphasis on UNIFORM ACCURACY ACROSS THE SONG OR SECTION rather than 
         analyzing EXACTLY which tones are playing at a given moment in time. (Eg. more important to know 
         that a song is based around a [Bm, D, A, G, A] pattern than knowing that between 0:30 and 0:47 it
