@@ -4,10 +4,10 @@ chord-grid
 requires ffmpeg and ffprobe
 
 
-The goal is to generate a playable grid of samples broken down by chord change
+The goal is to generate a playable grid of samples broken down by beat grid
 and ready to be imported to Ableton Live drum rack.
 
-We'll achieve this by analyzing given wav/mp3/flac/midi files using Chordino
+We'll achieve this by analyzing given wav/mp3/flac/midi files using Chordino (for now)
 through chord_extractor, then export to wav/mp3/flac/midi using pydub (for now).
 
 Inspired by the chordify grid - which is already doing this very well for most
@@ -49,7 +49,8 @@ most likely culprits are:
      momentarily?
 
 I think Chordify might stumble when it comes to more complicated progressions,
-that's generally not what I use it for.
+that's generally not what I use it for, Chordino's likely got the upper hand there.
+Or some combination of both?
 
 So, next find a way to:
   1. detect a song's beat grid
