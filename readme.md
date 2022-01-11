@@ -38,7 +38,7 @@ would be remedied if we could define the
 
 e.g. [Bm7, Dm, F/A, G/A, Bm, D/A, G7, Am, D/A, G, Am]
 
-Generally ending up with a chord that's more complex than required. I think the
+Generally ending up with a sequence that's tonally acurrate but less readable. I think the
 most likely culprits are:
 
   1. Chordify clearly has a sense of which beats chords fall on, I think that
