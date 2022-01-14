@@ -1,3 +1,10 @@
 mase.mp3
 .DS_Store
 .env/*
+
+./chords/
+./beats/
+./downbeats/
+./chords/*
+./beats/*
+./downbeats/*
