@@ -1,3 +1,5 @@
+import numpy as np
+
 from chord_extractor.extractors import Chordino
 from pydub import AudioSegment
 
@@ -13,6 +15,8 @@ chordino = Chordino()
 # positions of the beats in seconds, thus the expected sampling rate has to
 # be given.
 
+# TODO use madmom settings to get better chord/beat detection results
+
 chord_processor = CNNChordFeatureProcessor()
 chord_decoder = CRFChordRecognitionProcessor()
 
@@ -26,7 +30,7 @@ print(f'file_path: {file_path}')
 audio = AudioSegment.from_mp3(file_path)
 
 class Chord:
-    def __init__ (self, chord_name, curr_beat_time, curr_beat, prev_chord):  
+    def __init__ (self, chord_name, curr_beat_time, curr_beat, prev_chord):
         self.chord_name = chord_name
         self.curr_beat_time   = curr_beat_time
         self.curr_beat    = curr_beat
@@ -34,39 +38,92 @@ class Chord:
 
 
 def extract_and_export_chords():
+
     beats = beat_decoder(beat_processor(file_path))
     chords = chord_decoder(chord_processor(file_path))
+
+
+    for idx,  c in enumerate(chords):
+        if idx == len(chords):
+            break
+
+
+        # TODO: THIS ALMOST WORKS
+        # working for the first item but then it's deleting the wrong index
+
+        if (c[2] == 'N') and (len(chords) > idx + 1):
+            if idx == 0:
+                # first, have to combine w next
+                next_c = chords[idx +1]
+                next_c[0] = c[0]
+                chords[idx + 1] = next_c
+            else:
+                prev_c = chords[idx - 1]
+                prev_c[1] = c[1]
+                chords[idx - 1] = prev_c
+            chords = np.delete(chords, idx, 0)
+
     chordsArray = []
     chord_idx = 0
-    for beat_idx in range(len(beats) - 1):
-        curr_beat_time, curr_beat = beats[beat_idx]
-        # find the corresponding chord for this beat
-        while chord_idx < len(chords):
-            chord_time, _ , chord_name = chords[chord_idx]
-            prev_beat_time, _ = (0, 0) if beat_idx == 0 else beats[beat_idx - 1]
-            eps = (curr_beat_time - prev_beat_time) / 2
-            if chord_time > curr_beat_time + eps:
-                break
-            chord_idx += 1
-
-            # append to array
-            _, _, prev_chord = chords[chord_idx - 1]
-            chord = Chord(chord_name, curr_beat_time, curr_beat, prev_chord)
-            chordsArray.append(chord)
-
-    for c in chordsArray:
-        print(c.chord_name)
-        print(c.curr_beat_time)
+    chord_name = 'N'
 
     start = 0
-    for idx, c in enumerate(chordsArray):
-        if idx == len(chordsArray):
+    end = 0
+    for idx, c in enumerate(chords):
+        if idx == len(chords):
             break
-        end = c.curr_beat_time * 1000
+
+        start = c[0] * 1000
+        end = c[1] * 1000
+        chord_name = c[2]
+
         print(f'split at [{start}:{end}] ms')
         audio_chunk = audio[start:end]
-        audio_chunk.export(f'./output/chords/{idx}-{c.chord_name}-{str(start)}-{end}.mp3', format="mp3")
-        start = end
+
+        audio_chunk.export(f'./output/chords/{idx}-{chord_name}-{start}-{end}.mp3', format="mp3")
+        prev_chord = c
+
+
+    # TODO: figure this out next
+    # for beat_idx in range(len(beats) - 1):
+    #     curr_beat_time, curr_beat = beats[beat_idx]
+    #     # find the corresponding chord for this beat
+    #     while chord_idx < len(chords):
+    #         chord_time, _ , chord_name = chords[chord_idx]
+    #         prev_beat_time, _ = (0, 0) if beat_idx == 0 else beats[beat_idx - 1]
+    #         eps = (curr_beat_time - prev_beat_time) / 2
+    #         if chord_time > curr_beat_time + eps:
+    #             break
+    #         chord_idx += 1
+    # 
+    #         # append to array
+    #         # TODO: I know this is supposed to be @ the same level as the while
+    #         # loop for the chord/beat alignment to work properly
+    #         #
+    #         # BUT the chords look correct when it's over here
+    #         # and they look completely wrong with it over there
+    #         # maybe I have something else wrong earlier?
+    #     _, _, prev_chord = chords[chord_idx - 1]
+    #     chord = Chord(chord_name, curr_beat_time, curr_beat, prev_chord)
+    #     chordsArray.append(chord)
+
+    # for c in chordsArray:
+    #     print(c.chord_name)
+    #     print(c.curr_beat_time)
+
+    # chord_name = 'N'
+    # start = 0
+    # for idx, c in enumerate(chordsArray):
+    #     if idx == len(chordsArray):
+    #         break
+    #     end = c.curr_beat_time * 1000
+    #     print(f'split at [{start}:{end}] ms')
+    #     audio_chunk = audio[start:end]
+    #     audio_chunk.export(f'./output/chords/{idx}-{chord_name}-{str(start)}-{end}.mp3', format="mp3")
+    #     # leave this, printing an 0-0 chord at the start pushes everything back one
+    #     # TODO: adjust above so there is no 0-0 chord at the start
+    #     chord_name = c.chord_name
+    #     start = end
 
     print('done exporting chords')
 
