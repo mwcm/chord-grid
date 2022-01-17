@@ -114,7 +114,7 @@ def extract_and_export_chords():
     #         if chord_time > curr_beat_time + eps:
     #             break
     #         chord_idx += 1
-    # 
+    #
     #     _, _, prev_chord = chords[chord_idx - 1]
     #     chord = Chord(chord_name, curr_beat_time, curr_beat, prev_chord)
     #     chordsArray.append(chord)
