@@ -103,7 +103,7 @@ def extract_and_export_chords():
         prev_chord = c
 
 
-    # TODO: figure this out next
+    # TODO: figure this out when the chords look correct
     # for beat_idx in range(len(beats) - 1):
     #     curr_beat_time, curr_beat = beats[beat_idx]
     #     # find the corresponding chord for this beat
@@ -115,34 +115,9 @@ def extract_and_export_chords():
     #             break
     #         chord_idx += 1
     # 
-    #         # append to array
-    #         # TODO: I know this is supposed to be @ the same level as the while
-    #         # loop for the chord/beat alignment to work properly
-    #         #
-    #         # BUT the chords look correct when it's over here
-    #         # and they look completely wrong with it over there
-    #         # maybe I have something else wrong earlier?
     #     _, _, prev_chord = chords[chord_idx - 1]
     #     chord = Chord(chord_name, curr_beat_time, curr_beat, prev_chord)
     #     chordsArray.append(chord)
-
-    # for c in chordsArray:
-    #     print(c.chord_name)
-    #     print(c.curr_beat_time)
-
-    # chord_name = 'N'
-    # start = 0
-    # for idx, c in enumerate(chordsArray):
-    #     if idx == len(chordsArray):
-    #         break
-    #     end = c.curr_beat_time * 1000
-    #     print(f'split at [{start}:{end}] ms')
-    #     audio_chunk = audio[start:end]
-    #     audio_chunk.export(f'./output/chords/{idx}-{chord_name}-{str(start)}-{end}.mp3', format="mp3")
-    #     # leave this, printing an 0-0 chord at the start pushes everything back one
-    #     # TODO: adjust above so there is no 0-0 chord at the start
-    #     chord_name = c.chord_name
-    #     start = end
 
     print('done exporting chords')
 
