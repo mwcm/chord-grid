@@ -1,4 +1,5 @@
 import numpy as np
+from datetime import timedelta
 
 from chord_extractor.extractors import Chordino
 from pydub import AudioSegment
@@ -37,21 +38,22 @@ class Chord:
         self.prev_chord = prev_chord
 
 
-def extract_and_export_chords():
+def remove_N(chords):
+    """
+    Remove the 'N' chords representing segments where no chord is identified
 
-    beats = beat_decoder(beat_processor(file_path))
-    chords = chord_decoder(chord_processor(file_path))
-
-
+    Combines the 'N' chord segment with the prev chord segment - unless it's
+    the first segment in the list, in that case it's combined with the next.
+    """
+    idx_to_delete = []
     for idx,  c in enumerate(chords):
         if idx == len(chords):
             break
 
-
-        # TODO: THIS ALMOST WORKS
-        # working for the first item but then it's deleting the wrong index
-
-        if (c[2] == 'N') and (len(chords) > idx + 1):
+        # TODO: there's gotta be a better way to write this
+        #       only targetting c rather than next_c and prev_c
+        #       optimize later though
+        if (c[2] == 'N') and (len(chords) >= idx + 1):
             if idx == 0:
                 # first, have to combine w next
                 next_c = chords[idx +1]
@@ -61,11 +63,26 @@ def extract_and_export_chords():
                 prev_c = chords[idx - 1]
                 prev_c[1] = c[1]
                 chords[idx - 1] = prev_c
-            chords = np.delete(chords, idx, 0)
+            idx_to_delete.append(idx)
+
+    chords = np.delete(chords, idx_to_delete)
+    return chords
+
+
+def extract_and_export_chords():
+
+    beats = beat_decoder(beat_processor(file_path))
+    chords = chord_decoder(chord_processor(file_path))
+
 
     chordsArray = []
     chord_idx = 0
     chord_name = 'N'
+
+    chords = remove_N(chords)
+
+    # TODO: next need to combine sequential chords of the same name
+    # chords = combine sequential chords
 
     start = 0
     end = 0
@@ -77,10 +94,12 @@ def extract_and_export_chords():
         end = c[1] * 1000
         chord_name = c[2]
 
-        print(f'split at [{start}:{end}] ms')
+        start_readable = str(timedelta(milliseconds=start))
+        end_readable = str(timedelta(milliseconds=end))
+        print(f'split at [{start_readable}:{end_readable}] ms')
         audio_chunk = audio[start:end]
 
-        audio_chunk.export(f'./output/chords/{idx}-{chord_name}-{start}-{end}.mp3', format="mp3")
+        audio_chunk.export(f'./output/chords/{idx}-{chord_name}-{start_readable}-{end_readable}.mp3', format="mp3")
         prev_chord = c
 
 
