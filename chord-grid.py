@@ -19,9 +19,9 @@ chordino = Chordino()
 
 # TODO:
 # seems like the main issues now are:
-#       - the next chord often begins during the findal second of the
+#       - the next chord often begins during the final second of the
 #         current chord, these need to be adjusted so that that time is included
-#         in the next chord and disqualified from the current chord
+#         in the next chord and discluded from the current chord
 #           - align by beat?
 #           - graph the two against eachother next
 #
