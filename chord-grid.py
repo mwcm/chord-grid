@@ -1,3 +1,4 @@
+import re
 import numpy as np
 from datetime import timedelta
 
@@ -10,13 +11,37 @@ from madmom.features.chords import CNNChordFeatureProcessor, CRFChordRecognition
 
 chordino = Chordino()
 
-# TODO: i think we should probably analyze and provide sample rate here?
+# TODO: i think we should analyze and provide sample rate here?
 # From madmom Docs:
 # Create a DBNBeatTrackingProcessor. The returned array represents the
 # positions of the beats in seconds, thus the expected sampling rate has to
 # be given.
 
-# TODO use madmom settings to get better chord/beat detection results
+# TODO:
+# seems like the main issues now are:
+#       - the next chord often begins during the findal second of the
+#         current chord, these need to be adjusted so that that time is included
+#         in the next chord and disqualified from the current chord
+#           - align by beat?
+#           - graph the two against eachother next
+#
+#       - It often detects the min version or maj version incorrectly.
+#         It may be correct to the model but incorrect based on the songs
+#         notation. In these cases maybe try to find the key of the song?
+#         Althought if we're trying to find key baesd on the chords it'll be
+#         wrong if the chords are wrong.
+#
+#       - Having a db of song key would help
+#       - Having a db of bpm might help too
+#
+#      - Once in a while it detects completely incorrect chords, F#m or D#
+#
+#      - inconsistent segment lengths, need to be able to normalize lengths
+#
+#      - guess chord names based on the other chords in the song & verifiable
+#        key data?
+#
+#     - split chords by beats when chords are properly aligned
 
 chord_processor = CNNChordFeatureProcessor()
 chord_decoder = CRFChordRecognitionProcessor()
@@ -31,11 +56,22 @@ print(f'file_path: {file_path}')
 audio = AudioSegment.from_mp3(file_path)
 
 class Chord:
-    def __init__ (self, chord_name, curr_beat_time, curr_beat, prev_chord):
+    def __init__ (self, chord_name, curr_beat_time, prev_beat_time, curr_beat, prev_chord):
         self.chord_name = chord_name
-        self.curr_beat_time   = curr_beat_time
+        self.prev_beat_time = prev_beat_time
+        self.curr_beat_time = curr_beat_time
         self.curr_beat    = curr_beat
         self.prev_chord = prev_chord
+
+
+regx = re.compile('(?<![\d.])0*(?:(\d+)\.?|\.(0)|(\.\d+?)|(\d+\.\d+?))0*(?![\d.])')
+def number_shaver(ch, regx=regx, repl=lambda x: x.group(x.lastindex) if x.lastindex!=3 else '0' + x.group(3)):
+    # https://stackoverflow.com/questions/5807952/removing-trailing-zeros-in-python
+    return regx.sub(repl,ch)
+
+
+def display_ms(ms):
+    return number_shaver(str(timedelta(milliseconds=ms)))
 
 
 def remove_N(chords):
@@ -69,6 +105,35 @@ def remove_N(chords):
     return chords
 
 
+
+# TODO combine this with remove_N so only one loop
+def combine_sequential(chords):
+    """
+    combine sequential chords into one longer chord
+
+    this currently ignores Maj/Min as it seems like the algorithm detetcts that
+    very accurately, finding transitions where the notation indicates the same chord
+    it's possible you could just adjust a variable for likelyhood of chord transition?
+    """
+
+    idx_to_delete = []
+    for idx, c in enumerate(chords):
+        if idx == len(chords):
+            break
+
+        if (idx - 1 >= 0):
+            prev_c = chords[idx - 1]
+            if prev_c[2][0] == c[2][0]:
+                prev_c[1] = c[1]
+                chords[idx - 1] = prev_c
+                idx_to_delete.append(idx)
+        pass
+
+    chords = np.delete(chords, idx_to_delete)
+    return chords
+
+
+
 def extract_and_export_chords():
 
     beats = beat_decoder(beat_processor(file_path))
@@ -80,9 +145,7 @@ def extract_and_export_chords():
     chord_name = 'N'
 
     chords = remove_N(chords)
-
-    # TODO: next need to combine sequential chords of the same name
-    # chords = combine sequential chords
+    chords = combine_sequential(chords)
 
     start = 0
     end = 0
@@ -90,38 +153,20 @@ def extract_and_export_chords():
         if idx == len(chords):
             break
 
+        chord_name = c[2]
         start = c[0] * 1000
         end = c[1] * 1000
-        chord_name = c[2]
-
-        start_readable = str(timedelta(milliseconds=start))
-        end_readable = str(timedelta(milliseconds=end))
-        print(f'split at [{start_readable}:{end_readable}] ms')
         audio_chunk = audio[start:end]
 
-        audio_chunk.export(f'./output/chords/{idx}-{chord_name}-{start_readable}-{end_readable}.mp3', format="mp3")
-        prev_chord = c
-
-
-    # TODO: figure this out when the chords look correct
-    # for beat_idx in range(len(beats) - 1):
-    #     curr_beat_time, curr_beat = beats[beat_idx]
-    #     # find the corresponding chord for this beat
-    #     while chord_idx < len(chords):
-    #         chord_time, _ , chord_name = chords[chord_idx]
-    #         prev_beat_time, _ = (0, 0) if beat_idx == 0 else beats[beat_idx - 1]
-    #         eps = (curr_beat_time - prev_beat_time) / 2
-    #         if chord_time > curr_beat_time + eps:
-    #             break
-    #         chord_idx += 1
-    #
-    #     _, _, prev_chord = chords[chord_idx - 1]
-    #     chord = Chord(chord_name, curr_beat_time, curr_beat, prev_chord)
-    #     chordsArray.append(chord)
+        start = display_ms(start)
+        end = display_ms(end)
+        print(f'split at [{start} - {end}]')
+        audio_chunk.export(f'./output/chords/{idx}-{chord_name}-{start}-{end}.mp3', format="mp3")
 
     print('done exporting chords')
 
 
+# it seems like this is returning the same thing as extract_and_export_beats?
 def extract_and_export_downbeats():
 
     print('initializing RNNBeatProcessor...')
@@ -159,16 +204,12 @@ def extract_and_export_downbeats():
     return
 
 
-# TODO: I'm not exactly sure what this is doing?
-#       Maybe it is working properly and I'm just mishearing the results
-#       Need to graph out the results visually too
+# it seems like this is returning the same thing as extract_and_export_downbeats?
 def extract_and_export_beats():
-    # TODO: is this the best way to do this?
     act = RNNBeatProcessor()(file_path)
 
-    # TODO: maybe re-use the btp(act) results for downbeats?
-    #       not sure if that's going to be useful or not?
-    #       will they ever run one after another?
+    # TODO: maybe re-use the btp(act) results for downbeats if they run
+    # sequentially
     beats = beat_processor(act)
 
     n = 1
