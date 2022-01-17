@@ -3,13 +3,18 @@ import numpy as np
 from datetime import timedelta
 
 from chord_extractor.extractors import Chordino
-from pydub import AudioSegment
+from pydub import AudioSegment, silence
+from pydub.utils import mediainfo
+
 
 from madmom.features.beats import DBNBeatTrackingProcessor, RNNBeatProcessor
 from madmom.features.downbeats import DBNBarTrackingProcessor, RNNBarProcessor, RNNDownBeatProcessor, DBNDownBeatTrackingProcessor
 from madmom.features.chords import CNNChordFeatureProcessor, CRFChordRecognitionProcessor
 
 chordino = Chordino()
+
+# TODO: might be worth looking into https://github.com/fdlm/chordrec
+#       for more chord recognition options
 
 # TODO: i think we should analyze and provide sample rate here?
 # From madmom Docs:
@@ -60,14 +65,37 @@ chordino = Chordino()
 chord_processor = CNNChordFeatureProcessor()
 chord_decoder = CRFChordRecognitionProcessor()
 
-beat_processor = RNNDownBeatProcessor(fps=100)
-beat_decoder = DBNDownBeatTrackingProcessor(beats_per_bar=[4], fps=100)
+# TODO: seems like these @ 10 do same as at 100, for test song at least
+#       test more
+
+# 10 is aligned with chordprocessor
+beat_processor = RNNDownBeatProcessor(fps=10)
+# https://github.com/CPJKU/madmom/blob/3bc8334099feb310acfce884ebdb76a28e01670d/madmom/features/downbeats.py#L122
+beat_decoder = DBNDownBeatTrackingProcessor(beats_per_bar=[4], fps=10)
+
+# https://github.com/CPJKU/madmom/blob/3bc8334099feb310acfce884ebdb76a28e01670d/madmom/features/downbeats.py#L1038
+# DBNBarTrackingProcessor
 
 # use click to get file path properly
 file_path = '/Users/mwcmitchell/projects/chord-grid/mase.mp3'
 print(f'file_path: {file_path}')
 
+# TODO: pass this through instead of using it as a global
 audio = AudioSegment.from_mp3(file_path)
+
+# It seems like leading silence effects outputs:
+#   - removing leading silence before processing the file results
+#     in dramatically different results from the downbeat and chord processors
+#
+#   - accounting for leading slice in-loop like below in the
+#     extrac_and_export_chords fn seems to help a ton
+
+leading_silence = silence.detect_leading_silence(audio, chunk_size=1)
+
+def main():
+    extract_and_export_chords()
+    return
+
 
 class Chord:
     def __init__ (self, chord_name, curr_beat_time, prev_beat_time, curr_beat, prev_chord):
@@ -147,16 +175,10 @@ def combine_sequential(chords):
     return chords
 
 
-
 def extract_and_export_chords():
 
     beats = beat_decoder(beat_processor(file_path))
     chords = chord_decoder(chord_processor(file_path))
-
-
-    chordsArray = []
-    chord_idx = 0
-    chord_name = 'N'
 
     chords = remove_N(chords)
     chords = combine_sequential(chords)
@@ -168,8 +190,15 @@ def extract_and_export_chords():
             break
 
         chord_name = c[2]
-        start = c[0] * 1000
-        end = c[1] * 1000
+
+        # accounting for leading silence this way seems to help results
+        if start != 0:
+            start = (c[0] * 1000) - leading_silence
+        end = (c[1] * 1000) - leading_silence
+
+        # if len(audio) > ((c[1] * 1000) + leading_silence):
+        #     end = (c[1] * 1000) + leading_silence
+
         audio_chunk = audio[start:end]
 
         start = display_ms(start)
@@ -245,7 +274,7 @@ def extract_and_export_beats():
 
 
 def extract_and_export_chords_chordify():
-    chords = chordino.extract(file_path)
+    chords = chordino.extract(audio)
     print(f'extracted {len(chords)}')
 
     start = 0
@@ -267,4 +296,4 @@ def extract_and_export_chords_chordify():
 
 
 if __name__ == '__main__':
-    extract_and_export_chords()
+    main()
