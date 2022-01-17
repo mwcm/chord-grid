@@ -13,57 +13,22 @@ from madmom.features.chords import CNNChordFeatureProcessor, CRFChordRecognition
 
 chordino = Chordino()
 
-# TODO: might be worth looking into https://github.com/fdlm/chordrec
-#       for more chord recognition options
-
-# TODO: i think we should analyze and provide sample rate here?
-# From madmom Docs:
-# Create a DBNBeatTrackingProcessor. The returned array represents the
-# positions of the beats in seconds, thus the expected sampling rate has to
-# be given.
-
-# TODO:
-# seems like the main issues now are:
-#       - the next chord often begins during the final second of the
-#         current chord, these need to be adjusted so that that time is included
-#         in the next chord and discluded from the current chord
-#           - align by beat?
-#             - https://github.com/CPJKU/madmom/issues/403#issuecomment-449969937
-#             - Another — more sophisticated — solution would be to give the
-#               downbeats more weight to be more 'attractive' to chord changes,
-#               i.e. not to align the chords to the closest beat, but rather to
-#               the most likely (down-)beat position. You could implement
-#               something like this by only considering the downbeat positions
-#               for the coarse alignment (or shifting of the chord sequence)
-#               before doing the fine beat-level alignment.
-#           - graph the two against eachother next
-#
-#       - It often detects the min version or maj version incorrectly.
-#         It may be correct to the model but incorrect based on the songs
-#         notation. In these cases maybe try to find the key of the song?
-#         Althought if we're trying to find key baesd on the chords it'll be
-#         wrong if the chords are wrong.
-#
-#       - Having a db of song key would help
-#       - Having a db of bpm might help too
-#
-#           - it looks like both of these can be looked up in the spotify API
-#             can we supply the chord model a key to guess within?
-#
-#           - seems like the spotify data is what i'd expect, as oposed to some
-#             models out there. it's also more full than the million song data set
-#
-#      - Once in a while it detects completely incorrect chords, F#m or D#
-#
-#      - inconsistent segment lengths, need to be able to normalize lengths
-#
-#      - guess chord names based on the other chords in the song & verifiable
-#        key data?
-#
-#     - split chords by beats when chords are properly aligned
-
 chord_processor = CNNChordFeatureProcessor()
 chord_decoder = CRFChordRecognitionProcessor()
+
+
+# TODO:
+
+# BEFORE ANYTHING ELSE, NOTATE EXPECTED CHORD POSITIONS IN AUDACITY
+
+# USE IT TO COMPARE AGAINST
+#   - start with comparing against current results
+#   - then without removing leading silence, remove_N, combine_sequential
+
+# TRY TO ADJUST AUDIO/TS/SEGMENTS MANUALLY AS LITTLE AS POSSIBLE
+
+# TRY TO USE THE MODEL PARAMETERS EFFECTIVELYT
+
 
 # TODO: seems like these @ 10 do same as at 100, for test song at least
 #       test more
@@ -191,13 +156,12 @@ def extract_and_export_chords():
 
         chord_name = c[2]
 
-        # accounting for leading silence this way seems to help results
-        if start != 0:
-            start = (c[0] * 1000) - leading_silence
-        end = (c[1] * 1000) - leading_silence
+        if start == 0:
+            start = (c[0] * 1000) + leading_silence
+        else:
+            start = (c[0] * 1000)
 
-        # if len(audio) > ((c[1] * 1000) + leading_silence):
-        #     end = (c[1] * 1000) + leading_silence
+        end = (c[1] * 1000)
 
         audio_chunk = audio[start:end]
 
