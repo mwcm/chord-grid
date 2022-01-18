@@ -2,7 +2,6 @@ import re
 import numpy as np
 from datetime import timedelta
 
-from chord_extractor.extractors import Chordino
 from pydub import AudioSegment, silence
 from pydub.utils import mediainfo
 
@@ -11,7 +10,6 @@ from madmom.features.beats import DBNBeatTrackingProcessor, RNNBeatProcessor
 from madmom.features.downbeats import DBNBarTrackingProcessor, RNNBarProcessor, RNNDownBeatProcessor, DBNDownBeatTrackingProcessor
 from madmom.features.chords import CNNChordFeatureProcessor, CRFChordRecognitionProcessor
 
-chordino = Chordino()
 
 chord_processor = CNNChordFeatureProcessor()
 chord_decoder = CRFChordRecognitionProcessor()
@@ -42,7 +40,7 @@ beat_decoder = DBNDownBeatTrackingProcessor(beats_per_bar=[4], fps=10)
 # DBNBarTrackingProcessor
 
 # use click to get file path properly
-file_path = '/Users/mwcmitchell/projects/chord-grid/mase.mp3'
+file_path = 'C:/Users/mwcm/Documents/GitHub/chord-grid/mase.mp3'
 print(f'file_path: {file_path}')
 
 # TODO: pass this through instead of using it as a global
@@ -55,7 +53,7 @@ audio = AudioSegment.from_mp3(file_path)
 #   - accounting for leading slice in-loop like below in the
 #     extrac_and_export_chords fn seems to help a ton
 
-leading_silence = silence.detect_leading_silence(audio, chunk_size=1)
+# leading_silence = silence.detect_leading_silence(audio, chunk_size=1)
 
 def main():
     extract_and_export_chords()
@@ -78,7 +76,7 @@ def number_shaver(ch, regx=regx, repl=lambda x: x.group(x.lastindex) if x.lastin
 
 
 def display_ms(ms):
-    return number_shaver(str(timedelta(milliseconds=ms)))
+    return str(number_shaver(str(timedelta(milliseconds=ms)))).replace(':','-').replace('.', '-')
 
 
 def remove_N(chords):
@@ -156,10 +154,10 @@ def extract_and_export_chords():
 
         chord_name = c[2]
 
-        if start == 0:
-            start = (c[0] * 1000) + leading_silence
-        else:
-            start = (c[0] * 1000)
+        # if start == 0:
+        start = (c[0] * 1000) #+ leading_silence
+        #else:
+        #    start = (c[0] * 1000)
 
         end = (c[1] * 1000)
 
@@ -168,7 +166,7 @@ def extract_and_export_chords():
         start = display_ms(start)
         end = display_ms(end)
         print(f'split at [{start} - {end}]')
-        audio_chunk.export(f'./output/chords/{idx}-{chord_name}-{start}-{end}.mp3', format="mp3")
+        audio_chunk.export(f'./output/chords/{idx}_{chord_name.replace(":","-")}_{start}_{end}.mp3', format="mp3")
 
     print('done exporting chords')
 
@@ -237,26 +235,26 @@ def extract_and_export_beats():
     return
 
 
-def extract_and_export_chords_chordify():
-    chords = chordino.extract(audio)
-    print(f'extracted {len(chords)}')
+#def extract_and_export_chords_chordify():
+    #chords = chordino.extract(audio)
+    #print(f'extracted {len(chords)}')
 
-    start = 0
-    for  idx, c in enumerate(chords):
-        #break loop if at last element of list
-        if idx == len(chords):
-            break
+    #start = 0
+    #for  idx, c in enumerate(chords):
+        ##break loop if at last element of list
+        #if idx == len(chords):
+            #break
 
-        end = c.timestamp * 1000 #pydub works in millisec
-        print(f"split at [{start}:{end}] ms")
-        audio_chunk=audio[start:end]
+        #end = c.timestamp * 1000 #pydub works in millisec
+        #print(f"split at [{start}:{end}] ms")
+        #audio_chunk=audio[start:end]
 
-        # do os.mkdirs
-        audio_chunk.export(f"./output/chords/{idx}_{str(c.chord).replace('/','slash')}_{end}.mp3", format="mp3")
+        ## do os.mkdirs
+        #audio_chunk.export(f"./output/chords/{idx}_{str(c.chord).replace('/','slash')}_{end}.mp3", format="mp3")
 
-        start = end
-    print('done extracting chords')
-    return
+        #start = end
+    #print('done extracting chords')
+    #return
 
 
 if __name__ == '__main__':
