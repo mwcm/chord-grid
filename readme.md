@@ -1,6 +1,10 @@
 chord-grid
 ----------
 
+TODDO next:
+ - check audacity comparison, try removing any chords not in the song's key as pulled from spotify api
+ - look into how to better align chords/beats, use the model params  or try to modify  the script from the madmom repo issue
+
 requires ffmpeg and ffprobe built on py3.7.9
 
 numpy needs to be installed before madmom
