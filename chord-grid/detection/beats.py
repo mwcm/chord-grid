@@ -17,7 +17,9 @@ class Beats:
 
         # use post_processor = None to get all nn predictions
         self.beat_predictor = RNNBeatProcessor(
-            fps=self.fps, nn_files=self.nn_files, post_processor=None
+            fps=self.fps,
+            nn_files=self.nn_files,
+            post_processor=None
         )
 
         # with None selected the MultiModelProcessor will averages all predictions
@@ -29,7 +31,9 @@ class Beats:
 
         # NOTE: try to edit observation lambda and transition lambda here
         self.dbn_post_processor = DBNBeatTrackingProcessor(
-            fps=self.fps, min_bpm=self.min_bpm, max_bpm=self.max_bpm
+            fps=self.fps,
+            min_bpm=self.min_bpm,
+            max_bpm=self.max_bpm
         )
 
         # NOTE: try some of the params on this one too?

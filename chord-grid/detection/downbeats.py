@@ -3,13 +3,8 @@ from madmom.features.downbeats import (
     DBNBarTrackingProcessor, SyncronizeFeaturesProcessor
 )
 
-# DBNDownBeatTracking
-# Takes Activation function with probabilities corresponding to beats and downbeats given in the first and second column, respectively. 
-# Returns decoded Downbeat positions & beat #'s
-
-# DBNBarTracking
-# Array containing beat positions (first column) and corresponding downbeat activations (second column).
-# returns decoded Downbeat positions & beat #'s
+# TODO: SyncronizeFeaturesProcessor !!!!
+# --------------------------------------
 
 class DownBeats:
 
@@ -28,17 +23,20 @@ class DownBeats:
         self.downbeat_predictor = RNNDownBeatProcessor()
         # downbeat_bar_predictor takes beat predictions as well as audio
         self.downbeat_bar_predictor = RNNBarProcessor(
-            beat_subdivisions=self.beat_subdivisions, fps=self.fps
+            beat_subdivisions=self.beat_subdivisions,
+            fps=self.fps
         )
 
-        # maybe try experimenting with
+        # TODO: try experimenting with
         # num_tempi=60, transition_lambda=100, observation_lambda=16,
         self.downbeat_processor = DBNDownBeatTrackingProcessor(
-            beats_per_bar=self.beats_per_bar, fps=self.fps,
-            min_bpm = self.min_bpm, max_bpm=self.max_bpm
+            beats_per_bar=self.beats_per_bar,
+            fps=self.fps,
+            min_bpm = self.min_bpm,
+            max_bpm=self.max_bpm
         )
 
-        # maybe try experimenting with 
+        # TODO: try experimenting with 
         # observation_weight=100, meter_change_prob=1e-07
         self.downbeat_bar_processor = DBNBarTrackingProcessor(
             beats_per_bar=self.beats_per_bar
@@ -48,12 +46,17 @@ class DownBeats:
         return
 
 
-    def predict_downbeats(self, beats=None): 
+    def predict_downbeats(self, audio_file_path, beats=None): 
+        """ use the bar predictor if beats are provided """
 
         if beats:
-            return
+            downbeat_predictions = self.downbeat_bar_predictor(
+                (audio_file_path, beats)
+            )
+            return downbeat_predictions
         
-        return
+        downbeat_predictions = self.downbeat_predictor(audio_file_path)
+        return downbeat_predictions
 
 
     def process_downbeats(self, prediction, processor=None):
