@@ -8,7 +8,7 @@ from madmom.features.downbeats import (
 
 class DownBeats:
 
-    def __init__(self, beat_subdivisions=(4,2), beats_per_bar=[4],
+    def __init__(self, beat_subdivisions=(4,2), beats_per_bar=(4.0, 4.0),
                  fps=100, min_bpm=55.0, max_bpm=215.0):
         ''' beat_subdivions - tuple with # of beat subdivisions
             for the percussive and harmonic feature. '''

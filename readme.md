@@ -1,12 +1,23 @@
 chord-grid
 ----------
 
-chordipy?
+names:
+-----
+chordgrid
+chordipy
 
-TODDO next:
- - check audacity comparison, try removing any chords not in the song's key as pulled from spotify api
- - look into how to better align chords/beats, use the model params  or try to modify  the script from the madmom repo issue
 
+todo:
+----
+- ccould use sequentialrpocessors to combine steps
+- need logging
+- check audacity comparison, try removing any chords not in the song's key as pulled from spotify api
+- look into how to better align chords/beats, use the model params  or try to modify  the script from the madmom repo issue
+- rename repo
+
+
+readme
+------
 requires ffmpeg and ffprobe built on py3.7.9
 
 numpy needs to be installed before madmom

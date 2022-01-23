@@ -48,9 +48,11 @@ class Chords:
 
     def process_chord_features(self, chord_features):
         # recognize chords from features
-        return
+        decoded_chords = self.chord_crf_processor(chord_features)
+        return decoded_chords
 
 
     def process_chroma_vectors(self, chroma_vectors):
         # decode chord sequence from chroma vectors
-        return
+        decoded_chords = self.chord_deep_chroma_processor(chroma_vectors)
+        return decoded_chords
