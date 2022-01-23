@@ -5,6 +5,7 @@ from madmom.features.beats import (RNNBeatProcessor, MultiModelSelectionProcesso
 
 
 class Beats:
+
     def __init__(self, fps=100, min_bpm=15, max_bpm=215, nn_files=None, tempo_estimator=None):
         self.fps = fps
         self.min_bpm = min_bpm
@@ -38,10 +39,21 @@ class Beats:
         most_suitable_prediction = self.multi_model_prediction_processor(predictions)
         return most_suitable_prediction
 
-    def post_process_prediction(self, prediction, post_processor=self.post_processor.):
+    def post_process_prediction(self, prediction, post_processor=None):
+        """ if post_processor is None we'll use all of them """
+
+        beat_times = []
+
+        if not post_processor:
+            for idx, p in enumerate(self.post_processors):
+                p_beat_times = p(prediction) 
+                beat_times[idx] = p_beat_times
+            return beat_times
+
         if post_processor not in self.post_processors:
             raise ValueError(f'Invalid post_processor {post_processor}'
                              f'valid post processors are {self.post_processors}.')
+
         beat_times = post_processor(prediction)
         return beat_times
     
