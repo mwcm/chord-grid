@@ -2,13 +2,15 @@ import sys
 import os
 from subprocess import Popen
 
+
 class Audacity:
 
     def __init__(self, audacity_path=None):
+        
         self.audacity_path = audacity_path
-        self.TONAME = '/tmp/audacity_script_pipe.to.' + str(os.getuid())
-        self.FROMNAME = '/tmp/audacity_script_pipe.from.' + str(os.getuid())
         self.EOL = '\n'
+        if sys.platform == 'win32':
+            self.selfEOL = '\r\n\0'
         self.audacity_path = '/usr/bin/audacity'
 
         if audacity_path:
@@ -18,9 +20,29 @@ class Audacity:
                 self.audacity_path = '/Applications/Audacity.app'
             if sys.platform == 'win32':
                 self.audacity_path = 'C:\Program Files\Audacity\Audacity.exe'
-                self.TONAME = '\\\\.\\pipe\\ToSrvPipe'
-                self.FROMNAME = '\\\\.\\pipe\\FromSrvPipe'
-                self.selfEOL = '\r\n\0'
+
+        # init'd on connect
+        self.TONAME = None
+        self.FROMNAME = None
+        self.TOFILE = None
+        self.FROMFILE = None
+        return
+
+    
+    def open_audacity(self, audacity_path=None):
+        if not audacity_path:
+            audacity_path = self.audacity_path
+        Popen(audacity_path)
+        return
+
+        
+    def connect(self):
+        if sys.platform == 'win32':
+            self.TONAME = '\\\\.\\pipe\\ToSrvPipe'
+            self.FROMNAME = '\\\\.\\pipe\\FromSrvPipe'
+        else:
+            self.TONAME = '/tmp/audacity_script_pipe.to.' + str(os.getuid())
+            self.FROMNAME = '/tmp/audacity_script_pipe.from.' + str(os.getuid())
 
         if not os.path.exists(self.TONAME):        
             raise Exception(f'No file {self.TONAME}, ensure audacity is running with mod-script-pipe')
@@ -31,13 +53,6 @@ class Audacity:
 
         self.TOFILE = open(self.TONAME, 'w')
         self.FROMFILE = open(self.FROMNAME, 'rt')
-        return
-
-    
-    def open_audacity(self, audacity_path=None):
-        if not audacity_path:
-            audacity_path = self.audacity_path
-        Popen(audacity_path)
         return
 
         
@@ -64,13 +79,15 @@ class Audacity:
         return response
 
 
-    def import_audio(self, audio_file_path):
+    def import_audio(self, file_path):
+        self.do_command(f'Import2: Filename="{file_path}"')
         return
 
 
     def add_label_track(self, track_name):
         self.do_command('NewLabelTrack: ')
-        self.do_command(f'SetTrackStatus" Name={track_name}')
+        self.do_command('SelectTrack: Track="0"')
+        self.do_command(f'SetTrackStatus: Name="{track_name}"')
         return
 
 
@@ -80,5 +97,8 @@ class Audacity:
         return
 
 
-    def save_project(self, path):
+    def save_project(self, file_path):
+        if not str(file_path).endswith('.aup3'):
+            file_path = str(file_path) + '.aup3' 
+        self.do_command(f'SaveProject2: Filename="{file_path}"')
         return
