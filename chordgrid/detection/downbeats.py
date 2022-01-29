@@ -1,10 +1,8 @@
 from madmom.features.downbeats import (
     RNNDownBeatProcessor, RNNBarProcessor, DBNDownBeatTrackingProcessor,
-    DBNBarTrackingProcessor, SyncronizeFeaturesProcessor
+    DBNBarTrackingProcessor
 )
 
-# TODO: SyncronizeFeaturesProcessor !!!!
-# --------------------------------------
 
 class DownBeats:
 
