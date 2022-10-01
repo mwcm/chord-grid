@@ -10,7 +10,8 @@ chordipy
 todo:
 ----
 - rename repo
-- need logging
+- logging
+- upload examples
 - compare vs spotify beat/chord analysis
 - look into how to better align chords/beats
     - use the model params
