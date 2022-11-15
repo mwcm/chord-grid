@@ -8,7 +8,7 @@ requires ffmpeg and ffprobe built on py3.7.9
 
 numpy needs to be installed before madmom
 
-Below is an image of mase comparison.aup3 project in audacity with expected then analyzed chord labels
+Below is an image of mase comparison.aup3 project in audacity with expected then analyzed chord labels plotted by chord-grid
 ![image](https://user-images.githubusercontent.com/2433319/201976323-958a079c-e2d9-4e17-b01e-2c4257a10439.png)
 
 
