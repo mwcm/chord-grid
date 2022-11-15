@@ -3,22 +3,6 @@ chord-grid
 
 WIP, needs cleaning up, testing & improvements
 
-<<<<<<< HEAD
-todo:
-----
-- rename repo
-- need logging
-- compare vs spotify beat/chord analysis
-- look into how to better align chords/beats
-    - use the model params
-    - use SyncronizeFeatureProcessor
-    - try to modify  the script from the madmom repo issue
-
-
-readme
-------
-=======
->>>>>>> 5db775f33fd2c1ded67d5ecef180c0b462b7a442
 requires ffmpeg and ffprobe built on py3.7.9
 
 numpy needs to be installed before madmom
