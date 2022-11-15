@@ -4,8 +4,11 @@ from chordgrid.detection.downbeats import DownBeats
 
 def run():
     print('init')
-    beats = Beats()
-    downbeats = DownBeats()
-    chords = Chords()
+    beat_detection = Beats()
+    downbeat_detection = DownBeats()
+    chord_detection = Chords()
     print('done init')
+
+    
+
     return

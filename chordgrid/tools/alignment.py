@@ -13,3 +13,7 @@ def madmom_syncronize_features(features, downbeats, beat_subdivisions=4, fps=100
     sfp = SyncronizeFeaturesProcessor(beat_subdivisions=beat_subdivisions, fps=fps)
     beat_synchronized_features = sfp.process((features, downbeats))
     return beat_synchronized_features
+
+#  todo: add and fix script from madmom repo issue
+#        iirc there's something wrong with the first items in the return array
+#  https://github.com/CPJKU/madmom/issues/403#issuecomment-700387643   

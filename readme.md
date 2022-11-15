@@ -6,7 +6,6 @@ names:
 chordgrid
 chordipy
 
-
 todo:
 ----
 - rename repo
