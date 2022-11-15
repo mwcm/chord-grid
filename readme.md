@@ -1,7 +1,7 @@
 chord-grid
 ----------
 
-WIP, needs cleaning up
+WIP, needs cleaning up, testing & improvements
 
 requires ffmpeg and ffprobe built on py3.7.9
 
