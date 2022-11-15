@@ -15,19 +15,18 @@ chord_processor = CNNChordFeatureProcessor(fps=100)
 chord_decoder = CRFChordRecognitionProcessor(fps=100)
 # DeepChromaChordRecognitionProcessor
 
-# were you even using this before?
+#note: was this used earlier?
 beat_processor = DBNBeatTrackingProcessor(fps=100)
+
 # TODO:
+# Notate expected chord position in audacity
 
-# BEFORE ANYTHING ELSE, NOTATE EXPECTED CHORD POSITIONS IN AUDACITY
-
-# USE IT TO COMPARE AGAINST
+# - Use it to compare against
 #   - start with comparing against current results
 #   - then without removing leading silence, remove_N, combine_sequential
 
-# TRY TO ADJUST AUDIO/TS/SEGMENTS MANUALLY AS LITTLE AS POSSIBLE
-
-# TRY TO USE THE MODEL PARAMETERS EFFECTIVELYT
+# - Adjust audio segments manually as little as possible
+# - Use model params effectively
 
 
 # TODO: seems like these @ 10 do same as at 100, for test song at least
